@@ -124,7 +124,7 @@ const registerUser = asynchandler(async (req, res) => {
         new apiresponse(200, null, "Email verified successfully. You can now login.")
     );
 });
-const loginUser=asynchandler(async(req,res)=>{
+const loginUser = asynchandler(async(req,res)=>{
     const {email,userName ,password}=req.body
     if(!userName && !email){
         throw new apierror (400,"username or email is required")
@@ -144,8 +144,8 @@ const loginUser=asynchandler(async(req,res)=>{
 
    const{accessToken,refreshToken}= await generateAccessTokenAndRefreshToken(user._id)
 
-   const loggedinUser=await User.findById(user._id).
-   select("-password  -refreshToken")
+   const loggedinUser = await User.findById(user._id).select("-password -refreshToken");
+   
 
    const options={    // we are doing this because from frontend anyone can change the cookies so it will make sure only it will be changed by server
     httpOnly:true,
@@ -165,7 +165,7 @@ const loginUser=asynchandler(async(req,res)=>{
    )
 })
 
-const loggedOutUser=asynchandler(async(req,res)=>{
+const loggedOutUser = asynchandler(async(req,res)=>{
     User.findByIdAndUpdate(
         req.user._id,{
             $set:{                                      //set is a Operator 
@@ -187,9 +187,106 @@ const loggedOutUser=asynchandler(async(req,res)=>{
     .clearCookie("refreshToken")
     .json(new apiresponse(200,{},"User logged out successfully"))
 })
+const forgotPasswordRequest = asynchandler(async (req, res) => {
+    const { email } = req.body;
 
+    if (!email) {
+        throw new apierror(400, "Email is required");
+    }
 
+    const user = await User.findOne({ email });
+    if (!user) {
+        throw new apierror(404, "User not found");
+    }
+
+    const otp = generateOtp(); // returns "123456"
+    const hashedOtp = await bcrypt.hash(otp, 10);
+
+    user.otp = hashedOtp;
+    user.otpExpiry = Date.now() + 10 * 60 * 1000; // expires in 10 mins
+    user.otpPurpose = 'forgot'; // optional but good practice
+    user.canResetPassword = false; // reset flag if any
+    await user.save();
+
+    try {
+        await sendEmail(
+            email,
+            "Your OTP Code",
+            `Your OTP code is ${otp}. It will expire in 10 minutes.`
+        );
+    } catch (error) {
+        console.error("❌ Email sending failed:", error);
+        throw new apierror(500, "Failed to send OTP email");
+    }
+
+    return res.status(200).json(
+        new apiresponse(200, null, "OTP sent to your email.")
+    );
+});
+const resetverifyOtp = asynchandler(async (req, res) => {
+    const { email, otp } = req.body;
+
+    if (!email || !otp) {
+        throw new apierror(400, "Email and OTP are required");
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+        throw new apierror(404, "User not found");
+    }
+
+    if (!user.otp || !user.otpExpiry) {
+        throw new apierror(400, "OTP not requested");
+    }
+
+    if (user.otpExpiry < Date.now()) {
+        throw new apierror(400, "OTP has expired");
+    }
+
+    const isMatch = await bcrypt.compare(otp, user.otp);
+    if (!isMatch) {
+        throw new apierror(400, "Invalid OTP");
+    }
+
+    user.canResetPassword = true;
+    user.otp = undefined;
+    user.otpExpiry = undefined;
+    user.otpPurpose = undefined;
+
+    await user.save();
+
+    return res.status(200).json(
+        new apiresponse(200, null, "OTP verified. You can now reset your password.")
+    );
+});
+// Route: POST /reset-password
+const resetPassword = asynchandler(async (req, res) => {
+    const { email, newPassword } = req.body;
+
+    if (!email || !newPassword) {
+        throw new apierror(400, "Email and new password are required");
+    }
+
+    const user = await User.findOne({ email });
+
+    if (!user || !user.canResetPassword) {
+        throw new apierror(400, "OTP not verified or user does not exist");
+    }
+
+    user.password = newPassword; // Let the pre-save hook handle hashing
+
+    user.canResetPassword = false;
+    user.otp = undefined;
+    user.otpExpiry = undefined;
+    user.otpPurpose = undefined;
+
+    await user.save();
+
+    return res.status(200).json(
+        new apiresponse(200, null, "Password reset successfully. You can now log in.")
+    );
+});
 
 export{
-    generateAccessTokenAndRefreshToken,registerUser,verifyOtp,loginUser,loggedOutUser
+    generateAccessTokenAndRefreshToken,registerUser,verifyOtp,loginUser,loggedOutUser,forgotPasswordRequest,resetPassword,resetverifyOtp
 }

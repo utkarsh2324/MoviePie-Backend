@@ -39,6 +39,13 @@ const userSchema = new Schema({
     isVerified: {
         type: Boolean,
         default: false
+    },canResetPassword: {
+        type: Boolean,
+        default: false,
+    },
+    otpPurpose: {
+        type: String,
+        enum: ['register', 'forgot'],
     }
 
 }, {
@@ -51,10 +58,9 @@ userSchema.pre ("save",async function (next) {
     this.password= await bcrypt.hash(this.password,10)
     next()
 }) 
-userSchema.methods.isPasswordCorrect=async function(password){                 //this will check password is correct or not for existing user
-    return await bcrypt.compare(password,this.password)                       //password given by user and this.password was encrypted passwsord
-}
-
+userSchema.methods.isPasswordCorrect = async function (enteredPassword) {
+    return await bcrypt.compare(enteredPassword, this.password);
+};
 userSchema.methods.generateAccessToken=function(){
     return jwt.sign(
         {

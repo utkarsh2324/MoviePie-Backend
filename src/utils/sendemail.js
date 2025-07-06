@@ -1,7 +1,7 @@
 // utils/sendEmail.js
 import nodemailer from "nodemailer";
 
-export const sendEmail = async (email, subject, message) => {
+export const sendEmail = async (to, subject, message) => {
   try {
     const transporter = nodemailer.createTransport({
       service: "gmail",
@@ -12,8 +12,8 @@ export const sendEmail = async (email, subject, message) => {
     });
 
     const mailOptions = {
-      from: `"MyApp" <${process.env.EMAIL_USER}>`,
-      to: email,
+      from: `"MoviePie" <${process.env.EMAIL_USER}>`,
+      to: to,
       subject: subject,
       text: message,
     };
