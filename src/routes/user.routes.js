@@ -2,7 +2,8 @@ import express from "express";
 import { upload } from "../middlewares/multer.middleware.js";
 import { registerUser, verifyOtp ,loginUser,
     loggedOutUser,forgotPasswordRequest,resetPassword,
-resetverifyOtp} from "../controllers/user.controllers.js";
+    resetverifyOtp,changeCurrentPassword,getCurrentUser,
+    updateAccountDetails,updateUserAvatar} from "../controllers/user.controllers.js";
 import { verifyJWT } from "../middlewares/auth.middlewares.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { Router } from "express";
@@ -25,6 +26,10 @@ router.route("/logout").post(verifyJWT,loggedOutUser)
 router.route("/forgotPassword-otp").post(forgotPasswordRequest);
 router.route("/resetverify-otp").post(resetverifyOtp);
 router.route("/resetpassword").post(resetPassword);
-
+router.route("/change-password").post(verifyJWT,changeCurrentPassword)
+router.route("/current-user").get(verifyJWT,getCurrentUser)
+router.route("/update-account").patch(verifyJWT,updateAccountDetails)
+router.route("/avatar")
+.patch(verifyJWT,upload.single("avatar"),updateUserAvatar)
 
 export default router;

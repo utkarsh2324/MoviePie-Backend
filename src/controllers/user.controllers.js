@@ -259,7 +259,7 @@ const resetverifyOtp = asynchandler(async (req, res) => {
         new apiresponse(200, null, "OTP verified. You can now reset your password.")
     );
 });
-// Route: POST /reset-password
+
 const resetPassword = asynchandler(async (req, res) => {
     const { email, newPassword } = req.body;
 
@@ -286,7 +286,84 @@ const resetPassword = asynchandler(async (req, res) => {
         new apiresponse(200, null, "Password reset successfully. You can now log in.")
     );
 });
+const changeCurrentPassword=asynchandler(async(req,res)=>{
+    const {oldPassword,newPassword}=req.body
+
+   const user =await   User.findById(req.user?._id) 
+   const isPasswordCorrect=await user.isPasswordCorrect(oldPassword)
+    if(!isPasswordCorrect){
+        throw new apierror(400,"Invalid password")
+    }
+    user.password=newPassword
+    await user.save({validateBeforeSave:false})
+    return res
+    .status(200)
+    .json(new apiresponse(
+        200,{},
+        "Password changed successfully"
+    ))
+
+})
+
+//get current user
+const getCurrentUser=asynchandler(async(req,res)=>{
+    return res
+    .status(200)
+    .json(new apiresponse(200,req.user,"Current User fetch successfully"))
+})
+//updating account
+const updateAccountDetails=asynchandler(async(req,res)=>{
+    const {userName}=req.body
+    if(!(userName)){
+        throw new apierror(400,"All field are required")
+    }
+
+    const user= await User.findByIdAndUpdate(req.user?._id,
+        {
+            $set:{
+                userName:userName,
+            }
+        },
+        {new :true}                 //The information will be made available once the update is completed
+    ).select("-password")
+
+    return res
+    .status(200)
+    .json(new apiresponse(200,user,"Account details updated successfullt"))
+})
+
+//updating user Avataer
+const updateUserAvatar=asynchandler(async(req,res)=>{
+const avatarLocalPath=req.file?.path  
+if(!avatarLocalPath){
+    throw new apierror(400,"Avatar file is missing")                    //get through multer middleware
+}           
+const avatar=  await uploadOnCloudinary(avatarLocalPath)   
+if(!avatar.url){
+    throw new apierror(400,"Error while upload on avatar")
+}
+const user= await User.findByIdAndUpdate(req.user?._id,
+    {
+        $set:{
+            avatar:avatar.url
+        }
+    },
+    {new:true}
+).select("-password")
+
+return res
+.status(200)
+.json(new apiresponse(
+    200,
+    user,
+    "Avatar changed successfully"
+))
+
+})
+
 
 export{
-    generateAccessTokenAndRefreshToken,registerUser,verifyOtp,loginUser,loggedOutUser,forgotPasswordRequest,resetPassword,resetverifyOtp
+    generateAccessTokenAndRefreshToken,registerUser,verifyOtp,loginUser
+    ,loggedOutUser,forgotPasswordRequest,resetPassword,resetverifyOtp,
+    changeCurrentPassword,getCurrentUser,updateAccountDetails,updateUserAvatar
 }
