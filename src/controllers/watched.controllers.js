@@ -5,7 +5,7 @@ import { asynchandler } from "../utils/asynchandler.js";
 
 // ✅ Add to watched
 const addToWatched = asynchandler(async (req, res) => {
-  const { movieId, title, posterPath, releaseDate, mediaType } = req.body;
+  const { movieId, title, posterPath, releaseDate, mediaType, genres } = req.body;
 
   if (!movieId || !title) {
     throw new apierror(400, "movieId and title are required");
@@ -27,14 +27,14 @@ const addToWatched = asynchandler(async (req, res) => {
     posterPath,
     releaseDate,
     mediaType,
+    genres,         // new field
+    watchedAt: new Date(), // new field (optional, default is Date.now)
   });
 
   return res
     .status(201)
     .json(new apiresponse(201, added, "Added to watched list"));
 });
-
-
 
 // 📌 Get user's watched list
 const getUserWatched = asynchandler(async (req, res) => {

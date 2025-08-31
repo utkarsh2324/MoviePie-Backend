@@ -25,9 +25,18 @@ const watchedSchema = new mongoose.Schema(
       type: String, // "movie" or "tv"
       default: "movie",
     },
+    genres: {
+      type: [String], // store genres from TMDB
+      default: [],
+    },
+    watchedAt: {
+      type: Date, // track when user marked it as watched
+      default: Date.now,
+    },
   },
   { timestamps: true }
 );
 
-watchedSchema.index({ userId: 1, movieId: 1 }, { unique: true }); 
+watchedSchema.index({ userId: 1, movieId: 1 }, { unique: true });
+
 export const Watched = mongoose.model("Watched", watchedSchema);
