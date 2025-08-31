@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const watchlistSchema = new mongoose.Schema(
+const watchedSchema = new mongoose.Schema(
   {
     userId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -29,5 +29,5 @@ const watchlistSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-watchlistSchema.index({ userId: 1, movieId: 1 }, { unique: true }); 
-export const Watchlist = mongoose.model("Watchlist", watchlistSchema);
+watchedSchema.index({ userId: 1, movieId: 1 }, { unique: true }); 
+export const Watched = mongoose.model("Watched", watchedSchema);

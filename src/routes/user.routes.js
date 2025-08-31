@@ -8,9 +8,6 @@ import { verifyJWT } from "../middlewares/auth.middlewares.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { Router } from "express";
 
-// Multer setup for file uploads (avatar)
-
-
 const router=Router()
 router.route("/register").post(
     upload.fields([

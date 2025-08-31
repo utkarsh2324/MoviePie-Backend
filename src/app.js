@@ -23,10 +23,10 @@ app.use(express.urlencoded({
 app.use(cookieParser())
 import userRouter from "./routes/user.routes.js";
 import watchlistRouter from "./routes/watchlist.routes.js";
-
+import watchedRouter from "./routes/watched.routes.js"
 
 app.use("/api/v1/users",userRouter)     
 app.use("/api/v1/playlist",watchlistRouter)
-
+app.use("/api/watched", watchedRouter);
 
 export default app;
