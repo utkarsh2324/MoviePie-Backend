@@ -27,6 +27,6 @@ import watchedRouter from "./routes/watched.routes.js"
 
 app.use("/api/v1/users",userRouter)     
 app.use("/api/v1/playlist",watchlistRouter)
-app.use("/api/watched", watchedRouter)
+app.use("/api/v1/watched", watchedRouter)
 
 export default app;

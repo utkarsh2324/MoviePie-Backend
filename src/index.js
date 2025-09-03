@@ -1,4 +1,3 @@
-     // used to connect with database
 import connectDB from "./db/index.js";
 import dotenv from "dotenv";
 import app from "./app.js";
@@ -13,5 +12,4 @@ connectDB()
 })
 .catch((err)=>{
   console.log("MongoDB connection failed ",err);
-  
 })

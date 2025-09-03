@@ -36,13 +36,23 @@ const addToWatched = asynchandler(async (req, res) => {
     .json(new apiresponse(201, added, "Added to watched list"));
 });
 
-// 📌 Get user's watched list
+
+// 📌 Get user's watched list (with movies & series separated)
 const getUserWatched = asynchandler(async (req, res) => {
   const items = await Watched.find({ userId: req.user._id });
 
-  return res
-    .status(200)
-    .json(new apiresponse(200, items, "Fetched watched list"));
+  // Separate into movies and series
+  const movies = items.filter((item) => item.mediaType === "movie");
+  const series = items.filter((item) => item.mediaType === "tv" || item.mediaType === "series");
+
+  return res.status(200).json(
+    new apiresponse(200, {
+      totalMovies: movies.length,
+      totalSeries: series.length,
+      movies,
+      series,
+    }, "Fetched watched list with counts")
+  );
 });
 
 export { addToWatched, getUserWatched };
