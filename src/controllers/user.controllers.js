@@ -147,10 +147,12 @@ const loginUser = asynchandler(async(req,res)=>{
    const loggedinUser = await User.findById(user._id).select("-password -refreshToken");
    
 
-   const options={    // we are doing this because from frontend anyone can change the cookies so it will make sure only it will be changed by server
-    httpOnly:true,
-    secure:true
-   }
+   const options = {
+    httpOnly: true,
+    secure: true,        // must be true on production HTTPS
+    sameSite: "None",    // allows cross-origin cookies
+    maxAge: 7 * 24 * 60 * 60 * 1000 // optional: 7 days
+  };
 
    return res
    .status(200)
