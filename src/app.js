@@ -6,7 +6,7 @@ import cookieParser from "cookie-parser";
 const app=express()
 app.use(
     cors({
-      origin: 'https://movie-pie-frontend-git-main-utkarsh-raj-patels-projects.vercel.app',
+      origin: 'https://movie-pie-frontend.vercel.app',
       credentials: true,
     })
   );
