@@ -183,11 +183,12 @@ const loggedOutUser = asynchandler(async(req,res)=>{
         httpOnly:true,
         secure:true
        }
-    return res
-    .status(200)
-    .clearCookie("accessToken")
-    .clearCookie("refreshToken")
-    .json(new apiresponse(200,{},"User logged out successfully"))
+       res
+       .clearCookie("accessToken", { httpOnly: true, secure: true, sameSite: "None" })
+       .clearCookie("refreshToken", { httpOnly: true, secure: true, sameSite: "None" })
+       .status(200)
+       .json(new apiresponse(200, null, "User logged out successfully"));
+   
 })
 const forgotPasswordRequest = asynchandler(async (req, res) => {
     const { email } = req.body;
