@@ -157,7 +157,7 @@ const loginUser = asynchandler(async(req,res)=>{
    return res
    .status(200)
    .cookie("accessToken",accessToken,options)
-   .cookie("refreshToken",refreshToken)
+   .cookie("refreshToken",refreshToken,options)
    .json(
     new apiresponse(200,{
         user:loggedinUser,accessToken,refreshToken
