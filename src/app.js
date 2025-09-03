@@ -6,7 +6,7 @@ import cookieParser from "cookie-parser";
 const app=express()
 app.use(
     cors({
-      origin: 'https://movie-pie-frontend.vercel.app',
+      origin: 'https://movie-pie-frontend-f00b03oe6-utkarsh-raj-patels-projects.vercel.app',
       credentials: true,
     })
   );
@@ -21,6 +21,7 @@ app.use(express.urlencoded({
 
 //for cookiesx
 app.use(cookieParser())
+
 import userRouter from "./routes/user.routes.js";
 import watchlistRouter from "./routes/watchlist.routes.js";
 import watchedRouter from "./routes/watched.routes.js"
