@@ -136,7 +136,9 @@ const loginUser = asynchandler(async(req,res)=>{
     if(!user){
         throw new apierror(404,"User does not exist")
     }
-    
+    if (!user.isVerified) {
+        throw new apierror(403, "Please verify your email with OTP before logging in");
+      }
    const isPasswordValid= await user.isPasswordCorrect(password)
    if(!isPasswordValid){
     throw new apierror(401,"Invalid User Credentials")
