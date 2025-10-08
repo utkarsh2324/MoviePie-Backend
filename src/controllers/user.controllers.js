@@ -169,7 +169,7 @@ const loginUser = asynchandler(async(req,res)=>{
    )
 })
 
-const logoutUser = asynchandler(async (req, res) => {
+const loggedOutUser = asynchandler(async (req, res) => {
     const cookies = req.cookies;
     if (!cookies?.refreshToken) {
       return res.sendStatus(204); // No token to clear
