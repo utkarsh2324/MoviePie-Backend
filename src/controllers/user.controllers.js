@@ -169,29 +169,32 @@ const loginUser = asynchandler(async(req,res)=>{
    )
 })
 
-const loggedOutUser = asynchandler(async(req,res)=>{
-    User.findByIdAndUpdate(
-        req.user._id,{
-            $set:{                                      //set is a Operator 
-                refreshToken:undefined
-            }
-        },
-        {
-        new:true
-        }
-    )
-
-    const options={
-        httpOnly:true,
-        secure:true
-       }
-       res
-       .clearCookie("accessToken", { httpOnly: true, secure: true, sameSite: "None" })
-       .clearCookie("refreshToken", { httpOnly: true, secure: true, sameSite: "None" })
-       .status(200)
-       .json(new apiresponse(200, null, "User logged out successfully"));
-   
-})
+const logoutUser = asynchandler(async (req, res) => {
+    const cookies = req.cookies;
+    if (!cookies?.refreshToken) {
+      return res.sendStatus(204); // No token to clear
+    }
+  
+    const refreshToken = cookies.refreshToken;
+    const user = await User.findOne({ refreshToken });
+  
+    if (!user) {
+      // Even if user not found, clear cookies anyway
+      res.clearCookie("accessToken", { httpOnly: true, secure: true, sameSite: "None" });
+      res.clearCookie("refreshToken", { httpOnly: true, secure: true, sameSite: "None" });
+      return res.sendStatus(204);
+    }
+  
+    // Properly remove refresh token from DB
+    user.refreshToken = undefined;
+    await user.save({ validateBeforeSave: false });
+  
+    // Clear cookies (must match login cookie options)
+    res.clearCookie("accessToken", { httpOnly: true, secure: true, sameSite: "None" });
+    res.clearCookie("refreshToken", { httpOnly: true, secure: true, sameSite: "None" });
+  
+    res.status(200).json({ message: "User logged out successfully" });
+  });
 const forgotPasswordRequest = asynchandler(async (req, res) => {
     const { email } = req.body;
 
