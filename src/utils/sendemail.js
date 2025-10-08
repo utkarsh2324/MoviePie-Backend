@@ -1,27 +1,28 @@
+// utils/sendEmail.js
 import nodemailer from "nodemailer";
 
 export const sendEmail = async (to, subject, message) => {
   try {
     const transporter = nodemailer.createTransport({
-      host: "smtp.zoho.com",
-      port: 465,
-      secure: true, // SSL
+      service: "gmail",
       auth: {
         user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS, // App password!
+        pass: process.env.EMAIL_PASS,
       },
     });
 
-    await transporter.sendMail({
+    const mailOptions = {
       from: `"MoviePie" <${process.env.EMAIL_USER}>`,
-      to,
-      subject,
+      to: to,
+      subject: subject,
       text: message,
-    });
+    };
 
-    console.log("✅ OTP email sent:", to);
+    const result = await transporter.sendMail(mailOptions);
+    console.log(" Email sent:", result.messageId);
+    return result;
   } catch (error) {
-    console.error("❌ Email sending failed:", error.message);
-    throw new apierror(500, "Failed to send OTP email. Check SMTP credentials.");
+    console.error(" Email sending failed:", error.message);
+    throw error;
   }
 };
